@@ -105,15 +105,14 @@ make clean         # Nettoyer tout
 - [ ] Configurer le reverse proxy si nécessaire
 - [ ] Mettre en place les sauvegardes DB
 
-### Commande de déploiement
+### Commandes de déploiement
 
 ```bash
-# Sur votre serveur
-git clone <votre-repo>
-cd blog
-cp .env.docker.prod .env
-# Éditer .env avec vos vraies valeurs
-make prod
+# Test local avec config production
+make prod-dokploy
+
+# Déploiement Dokploy
+# Voir DOKPLOY_DEPLOYMENT.md pour le guide complet
 ```
 
 ## 🎯 **Prochaines étapes**

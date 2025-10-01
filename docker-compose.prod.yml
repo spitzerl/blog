@@ -1,56 +1,51 @@
-# docker-compose.prod.yml - Configuration Docker pour la production
+# docker-compose.prod.yml - Configuration Docker pour la production & Dokploy
 
 services:
   # ===== BASE DE DONNÉES =====
   postgres:
     image: postgres:16-alpine
-    container_name: blog-postgres-prod
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-bloguser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-blogpassword}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-blogdb}
     volumes:
-      - postgres_prod_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - blog-network
+      - app-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bloguser} -d ${POSTGRES_DB:-blogdb}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: always
-    # Ne pas exposer le port en production pour la sécurité
-    # ports:
-    #   - "5432:5432"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Port non exposé - communication interne uniquement (sécurité)
 
   # ===== APPLICATION WEB =====
-  web:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: blog-web-prod
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-bloguser}:${POSTGRES_PASSWORD:-blogpassword}@postgres:5432/${POSTGRES_DB:-blogdb}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bloguser}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-blogdb}
       - BACKEND_PORT=3001
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
-      - JWT_SECRET=${JWT_SECRET:-changeme}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
       - SEED_DB=${SEED_DB:-false}
       - DB_HOST=postgres
       - DB_PORT=5432
     ports:
-      - "80:3000"   # HTTP
-      - "3001:3001" # API Backend
+      - "3000:3000"  # Port standard pour Dokploy
     networks:
-      - blog-network
+      - app-network
     depends_on:
       postgres:
         condition: service_healthy
-    restart: always
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -75,12 +70,10 @@ services:
 
 # ===== RÉSEAUX =====
 networks:
-  blog-network:
+  app-network:
     driver: bridge
-    name: blog-network-prod
 
 # ===== VOLUMES =====
 volumes:
-  postgres_prod_data:
-    name: blog-postgres-prod-data
+  postgres_data:
     driver: local

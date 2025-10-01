@@ -19,8 +19,13 @@ dev-d: ## Démarre l'environnement de développement en arrière-plan
 	docker-compose -f $(COMPOSE_FILE) up --build -d
 
 # ===== PRODUCTION =====
-prod: ## Démarre l'environnement de production
-	docker-compose -f $(COMPOSE_PROD_FILE) up --build -d
+prod: ## Démarre l'environnement de production (local)
+	docker compose -f $(COMPOSE_PROD_FILE) up --build -d
+
+prod-dokploy: ## Test en local avec la config Dokploy
+	@echo "🚀 Test de la configuration Dokploy en local..."
+	docker compose -f $(COMPOSE_PROD_FILE) up --build -d
+	@echo "✅ Environnement Dokploy prêt sur http://localhost:3000"
 
 # ===== BUILD =====
 build: ## Construit l'image Docker
