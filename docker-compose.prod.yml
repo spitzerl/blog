@@ -1,0 +1,86 @@
+# docker-compose.prod.yml - Configuration Docker pour la production
+
+services:
+  # ===== BASE DE DONNÉES =====
+  postgres:
+    image: postgres:16-alpine
+    container_name: blog-postgres-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bloguser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-blogpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-blogdb}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bloguser} -d ${POSTGRES_DB:-blogdb}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    # Ne pas exposer le port en production pour la sécurité
+    # ports:
+    #   - "5432:5432"
+
+  # ===== APPLICATION WEB =====
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: blog-web-prod
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bloguser}:${POSTGRES_PASSWORD:-blogpassword}@postgres:5432/${POSTGRES_DB:-blogdb}
+      - BACKEND_PORT=3001
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      - JWT_SECRET=${JWT_SECRET:-changeme}
+      - SEED_DB=${SEED_DB:-false}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    ports:
+      - "80:3000"   # HTTP
+      - "3001:3001" # API Backend
+    networks:
+      - blog-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===== REVERSE PROXY (OPTIONNEL) =====
+  nginx:
+    image: nginx:alpine
+    container_name: blog-nginx
+    ports:
+      - "443:443"  # HTTPS
+      - "80:80"    # HTTP (redirection vers HTTPS)
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - blog-network
+    depends_on:
+      - web
+    restart: always
+    profiles:
+      - nginx  # Démarre seulement avec --profile nginx
+
+# ===== RÉSEAUX =====
+networks:
+  blog-network:
+    driver: bridge
+    name: blog-network-prod
+
+# ===== VOLUMES =====
+volumes:
+  postgres_prod_data:
+    name: blog-postgres-prod-data
+    driver: local

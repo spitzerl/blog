@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Configuration pour Docker
+  output: 'standalone',
+  
   images: {
     remotePatterns: [
       {
@@ -16,6 +19,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  
+  // Configuration expérimentale pour Docker
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
   },
 };
 
