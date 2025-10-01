@@ -53,9 +53,9 @@ npm run docker:prod
 
 | Service | Port | Description |
 |---------|------|-------------|
-| **web** | 3000 | Application Next.js + Backend Express |
-| **postgres** | 5432 | Base de données PostgreSQL |
-| **prisma-studio** | 5555 | Interface Prisma (optionnel) |
+| **web** | 3002 | Application Next.js + Backend Express (3003) |
+| **postgres** | 5433 | Base de données PostgreSQL |
+| **prisma-studio** | 5556 | Interface Prisma (optionnel) |
 
 ## 🛠 Commandes Make
 

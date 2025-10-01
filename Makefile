@@ -85,6 +85,6 @@ demo: ## Démarre un environnement de démonstration complet
 	@echo "⏳ Attente du démarrage complet..."
 	sleep 30
 	@echo "✅ Démonstration prête !"
-	@echo "📱 Frontend: http://localhost:3000"
-	@echo "🔧 Backend API: http://localhost:3001"
-	@echo "🗃️  Prisma Studio: make prisma-studio (puis http://localhost:5555)"
+	@echo "📱 Frontend: http://localhost:3002"
+	@echo "🔧 Backend API: http://localhost:3003"
+	@echo "🗃️  Prisma Studio: make prisma-studio (puis http://localhost:5556)"

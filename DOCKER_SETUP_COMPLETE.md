@@ -39,10 +39,10 @@ npm run docker:dev
 
 ### URLs d'accès
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
-- **Base de données**: localhost:5432
-- **Prisma Studio**: `make prisma-studio` puis http://localhost:5555
+- **Frontend**: http://localhost:3002
+- **Backend API**: http://localhost:3003
+- **Base de données**: localhost:5433
+- **Prisma Studio**: `make prisma-studio` puis http://localhost:5556
 
 ### Commandes utiles
 

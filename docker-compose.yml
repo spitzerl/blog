@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: blogdb
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=fr_FR.UTF-8 --lc-ctype=fr_FR.UTF-8"
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Port externe 5433 pour éviter le conflit
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -41,9 +41,9 @@ services:
       - DB_HOST=postgres
       - DB_PORT=5432
     ports:
-      - "3000:3000"  # Next.js
-      - "3001:3001"  # Backend Express
-      - "5555:5555"  # Prisma Studio (optionnel)
+      - "3002:3000"  # Next.js
+      - "3003:3001"  # Backend Express
+      - "5556:5555"  # Prisma Studio (optionnel)
     volumes:
       - .:/app
       - /app/node_modules
@@ -56,13 +56,13 @@ services:
     restart: unless-stopped
     command: >
       sh -c "
-        echo '⏳ Attente de PostgreSQL...' &&
+        echo 'Attente de PostgreSQL...' &&
         while ! nc -z postgres 5432; do sleep 1; done &&
-        echo '✅ PostgreSQL prêt' &&
+        echo 'PostgreSQL pret' &&
         npx prisma migrate deploy &&
         npx prisma generate &&
-        if [ \"$$SEED_DB\" = \"true\" ]; then npm run seed || true; fi &&
-        echo '🚀 Démarrage de l\\'application...' &&
+        if [ \"\$$SEED_DB\" = \"true\" ]; then npm run seed || true; fi &&
+        echo 'Demarrage de l application...' &&
         node backend/index.js & npm run dev
       "
 
@@ -76,7 +76,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://bloguser:blogpassword@postgres:5432/blogdb
     ports:
-      - "5555:5555"
+      - "5556:5555"
     volumes:
       - .:/app
       - /app/node_modules
