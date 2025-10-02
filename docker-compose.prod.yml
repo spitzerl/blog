@@ -33,6 +33,10 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      - FRONTEND_URL=${FRONTEND_URL}
       - SEED_DB=${SEED_DB:-false}
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -45,10 +49,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # ===== REVERSE PROXY (OPTIONNEL) =====
   nginx:
@@ -61,9 +66,9 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     networks:
-      - blog-network
+      - app-network
     depends_on:
-      - web
+      - app
     restart: always
     profiles:
       - nginx  # Démarre seulement avec --profile nginx
