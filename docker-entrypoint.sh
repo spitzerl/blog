@@ -38,9 +38,10 @@ if [ -f "backend/index.js" ]; then
 fi
 
 # Démarrer Next.js
-echo "⚡ Démarrage de Next.js sur le port 3000..."
+APP_PORT=${PORT:-3000}
+echo "⚡ Démarrage de Next.js sur le port $APP_PORT..."
 if [ "$NODE_ENV" = "production" ]; then
   exec node server.js
 else
-  exec npm run dev
+  exec npm run dev -- --port $APP_PORT
 fi

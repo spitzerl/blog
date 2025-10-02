@@ -40,8 +40,9 @@ services:
       - SEED_DB=${SEED_DB:-false}
       - DB_HOST=postgres
       - DB_PORT=5432
-    ports:
-      - "3000:3000"  # Port standard pour Dokploy
+    # Dokploy gère les ports automatiquement
+    expose:
+      - "3000"
     networks:
       - app-network
     depends_on:
