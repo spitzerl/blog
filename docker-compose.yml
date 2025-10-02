@@ -1,0 +1,102 @@
+# docker-compose.yml - Configuration Docker pour le blog
+
+services:
+  # ===== BASE DE DONNÉES =====
+  postgres:
+    image: postgres:16-alpine
+    container_name: blog-postgres
+    environment:
+      POSTGRES_USER: bloguser
+      POSTGRES_PASSWORD: blogpassword
+      POSTGRES_DB: blogdb
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=fr_FR.UTF-8 --lc-ctype=fr_FR.UTF-8"
+    ports:
+      - "5433:5432"  # Port externe 5433 pour éviter le conflit
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bloguser -d blogdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ===== APPLICATION WEB =====
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: blog-web
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://bloguser:blogpassword@postgres:5432/blogdb
+      - BACKEND_PORT=3001
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=changeme
+      - JWT_SECRET=dev-secret-key-change-in-production
+      - SEED_DB=true
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    ports:
+      - "3002:3000"  # Next.js
+      - "3003:3001"  # Backend Express
+      - "5556:5555"  # Prisma Studio (optionnel)
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - blog-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Attente de PostgreSQL...' &&
+        while ! nc -z postgres 5432; do sleep 1; done &&
+        echo 'PostgreSQL pret' &&
+        npx prisma migrate deploy &&
+        npx prisma generate &&
+        if [ \"\$$SEED_DB\" = \"true\" ]; then npm run seed || true; fi &&
+        echo 'Demarrage de l application...' &&
+        node backend/index.js & npm run dev
+      "
+
+  # ===== PRISMA STUDIO (OPTIONNEL) =====
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: blog-prisma-studio
+    environment:
+      - DATABASE_URL=postgresql://bloguser:blogpassword@postgres:5432/blogdb
+    ports:
+      - "5556:5555"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - blog-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npx prisma studio --hostname 0.0.0.0
+    profiles:
+      - tools  # Démarre seulement avec --profile tools
+
+# ===== RÉSEAUX =====
+networks:
+  blog-network:
+    driver: bridge
+    name: blog-network
+
+# ===== VOLUMES =====
+volumes:
+  postgres_data:
+    name: blog-postgres-data
+    driver: local

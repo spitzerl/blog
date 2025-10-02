@@ -11,6 +11,7 @@
 4. [Configuration](#configuration)
 5. [Utilisation](#utilisation)
 6. [Structure du projet](#structure-du-projet)
+7. [Planification du projet](#planification-du-projet)
 
 ---
 
@@ -82,3 +83,38 @@ blog/
 ├── package.json
 └── README.md
 ```
+
+---
+
+## Planification du projet
+
+### Front-end
+
+- Mise en place de Next.js avec TypeScript
+- Création des pages principales : liste des articles, page d’article, page de connexion
+- Composants réutilisables : ArticleCard, CommentSection, Formulaires
+- Design minimaliste et responsive (CSS Modules ou Tailwind)
+- Gestion de l’état et des appels API (fetch, SWR ou React Query)
+
+### Back-end
+
+- API REST via les routes Next.js (`/api`)
+- Logique métier pour la gestion des articles, utilisateurs, commentaires
+- Authentification sécurisée (JWT, bcrypt)
+- Gestion des rôles et permissions
+- Validation des données reçues
+
+### Base de données
+
+- Modélisation avec Prisma et PostgreSQL
+- Création des migrations et du fichier `schema.prisma`
+- Stockage sécurisé des mots de passe
+- Mise en place des relations (utilisateurs, rôles, articles, commentaires)
+- Tests et évolutivité du schéma
+
+### Déploiement
+
+- Préparation d’un Dockerfile pour containeriser l’application
+- Configuration de Dokploy pour le déploiement sur VPS
+- Gestion des variables d’environnement et des secrets
+- Documentation pour le déploiement et la maintenance

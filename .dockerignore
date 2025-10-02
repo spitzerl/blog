@@ -1,0 +1,79 @@
+# .dockerignore - Fichiers à exclure du contexte Docker
+
+# ===== DEPENDENCIES =====
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== BUILD OUTPUTS =====
+.next/
+out/
+build/
+dist/
+
+# ===== ENVIRONMENT =====
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===== LOGS =====
+*.log
+logs/
+
+# ===== CACHE =====
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.turbo/
+
+# ===== DATABASE =====
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== DEVELOPMENT =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== GIT =====
+.git/
+.gitignore
+.github/
+
+# ===== DOCKER =====
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# ===== TESTS =====
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# ===== OS SPECIFIC =====
+.DS_Store
+Thumbs.db
+
+# ===== DOCUMENTATION =====
+README.md
+docs/
+*.md
+
+# ===== PRISMA =====
+prisma/migrations/*/migration.sql
+# Garder le schema et les seeds
+!prisma/schema.prisma
+!prisma/seed.mjs
+
+# ===== BACKUP =====
+*.backup
+*.bak
+*.tmp
